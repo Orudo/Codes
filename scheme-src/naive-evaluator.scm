@@ -5,9 +5,9 @@
 
 (define apply-in-underlying-scheme apply)
 (define (eval exp env)
-  (display exp)
+  ;(display exp)
   (newline)
-  (display env)
+  ;(display env)
   (newline)
   (newline)
   (cond ((self-evaluating? exp) exp)
@@ -17,8 +17,11 @@
 	((definition? exp) (eval-definition exp env))
 	((if? exp) (eval-if exp env))
 	((lambda? exp)
+	 (display "eval-lambda")
+	 (newline)
+	 (display exp)
 	 (make-procedure (lambda-parameters exp)
-			 (lambda-body exp)
+			 (cddr exp)
 			 env))
 	((Begin? exp)
 	 (eval-sequence (begin-action exp) env))
@@ -80,7 +83,7 @@
 (define (definition-value exp)
   (if (symbol? (cadr exp))
       (caddr exp)
-      (make-lambda (cdadr exp) (caddr exp))))
+      (make-lambda (cdadr exp) (cddr exp))))
 
 (define (eval-definition exp env)
   (define-variable! (definition-variable exp)
@@ -111,7 +114,7 @@
 
 ;implementation for if
 (define (eval-if exp env)
-  (if (ture? (eval (if-predicate exp) env))
+  (if (true? (eval (if-predicate exp) env))
       (eval (if-consequent exp) env)
       (eval (if-alternative exp) env)))
 (define (if? exp)
@@ -133,6 +136,7 @@
 (define (begin-action exp)
   (cdr exp))
 (define (last-exp exp)
+  (display exp)
   (null? (cdr exp)))
 
 (define (first-exp exp)
@@ -173,26 +177,20 @@
   (cddr exp))
 
 
-(define (eval-consequence exp env)
-  (cond ((last-exp? exp) (eval (first-exp exp) env))
+(define (eval-sequence exp env)
+  (cond ((last-exp exp) (eval (first-exp exp) env))
 	(else (eval (first-exp exp) env)
-	      (eval-consequence (rest-exp exp) env))))
+	      (eval-sequence (rest-exp exp) env))))
 
 
 (define (primitive-procedure? exp)
   (tagged-list exp `primitive))
 
 (define (apply-myevaluator proc args)
-  (display proc)
-  (newline)
-  (display args)
-  (newline)
-  (newline)
-  (newline)
   (cond ((primitive-procedure? proc)
 	 (apply-primitive-procedure proc args))
 	((compound-procedure? proc)
-	 (eval-sequence (proc-body proc)
+	 (eval-sequence (procedure-body proc)
 			(extend-environment (procedure-parameters proc)
 				    args
 				    (procedure-environment proc))))
@@ -212,6 +210,7 @@
 
 
 (define (make-procedure para body env)
+  (display body)
   (list `procedure para body env))
 (define (compound-procedure? exp)
   (tagged-list exp `procedure))
@@ -304,14 +303,17 @@
        primitive-procedures))
 (define (apply-primitive-procedure proc args)
   (begin
-    (display "primitive procedure applied")
-    (display (primitive-implementation proc))
+   ; (display "primitive procedure applied")
+   ; (display (primitive-implementation proc))
     (newline)
-    (display args)
+   ; (display args)
     (newline)
     (apply-in-underlying-scheme
      (primitive-implementation proc)
      args)))
+
+
+
   
 
 (define global-environment (setup-environment))
