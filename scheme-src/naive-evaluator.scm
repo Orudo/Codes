@@ -1,15 +1,6 @@
-;(define (lambda? exp)
- ; (display "query if lambda")
-  ;(newline)
-  ;(tagged-list exp 'lambda))
 
 (define apply-in-underlying-scheme apply)
 (define (eval exp env)
-  ;(display exp)
-  (newline)
-  ;(display env)
-  (newline)
-  (newline)
   (cond ((self-evaluating? exp) exp)
 	((variable? exp) (lookup-variable-value exp env))
 	((quote? exp) (text-of-quotation exp))
@@ -25,8 +16,6 @@
 			 env))
 	((Begin? exp)
 	 (eval-sequence (begin-action exp) env))
-	;((cond? exp)
-	 ;(eval (cond->if exp) env))
 	((application? exp)
 	 (apply-myevaluator
 	  (eval (operator exp) env)
@@ -52,9 +41,6 @@
   (tagged-list exp `define))
 (define (if? exp)
   (tagged-list exp `if))
-;(define (lambda? exp)
-;  (tagged-list exp `lambda))
-
 (define (self-evaluating? exp)
   (cond ((number? exp) #t)
 	((string? exp) #t)
@@ -97,9 +83,6 @@
 	
 
 
-
-;(define (list-of-value args env)
-;  (map (lambda (vari) (lookup-variable-value vari env)) args))
 
 					;implementation above may not runable
 (define (no-operand args)
@@ -157,7 +140,7 @@
   (car exp))
 (define (operand exp)
   (cdr exp))
-;(define (no-operand? ops) (null? ops))
+
 (define (first-operand ops)
   (car ops))
 (define (rest-operand ops)
@@ -169,7 +152,6 @@
 (define (make-lambda para body)
   (cons `lambda (cons para body)))
 (define (lambda? exp)
-  ;(display "inqury lambda")
   (tagged-list exp `lambda))
 (define (lambda-parameters exp)
   (cadr exp))
@@ -303,11 +285,6 @@
        primitive-procedures))
 (define (apply-primitive-procedure proc args)
   (begin
-   ; (display "primitive procedure applied")
-   ; (display (primitive-implementation proc))
-    (newline)
-   ; (display args)
-    (newline)
     (apply-in-underlying-scheme
      (primitive-implementation proc)
      args)))
