@@ -17,6 +17,8 @@
 			 env))
 	((Begin? exp)
 	 (eval-sequence (begin-action exp) env))
+	((let? exp)
+	 (eval-let (let-content exp) env))
 	((application? exp)
 	 (apply-myevaluator
 	  (eval (operator exp) env)
@@ -50,6 +52,24 @@
 
 (define (text-of-quotation exp)
   (cdr exp))
+
+
+					;imp for let
+(define (let? exp)
+  (tagged-list exp `let))
+(define (let-content exp)
+  (cdr exp))
+(define (eval-let exp env)
+  (let ((list-of-var-val (car exp))
+	(body (cdr exp)))
+    (display "eval let")
+    (newline)
+    (display (let-lambda list-of-var-val body))
+    (apply-myevaluator (eval (make-lambda (map car list-of-var-val) body) env) (map cadr list-of-var-val))))
+(define (make-let var-val body)
+  (list 'let var-val body))
+
+
 
 
 ;Sentences for assignment
@@ -112,7 +132,7 @@
       (cadddr exp)
       `false));the false for user
 (define (make-if predicate consequent alternative)
-  (list predicate consequent alternative))
+  (list `if predicate consequent alternative))
 
 					;implementation for consequent sentence
 (define (begin? exp)
@@ -120,7 +140,6 @@
 (define (begin-action exp)
   (cdr exp))
 (define (last-exp exp)
-  (display exp)
   (null? (cdr exp)))
 
 (define (first-exp exp)
@@ -193,8 +212,13 @@
 
 
 (define (make-procedure para body env)
-  (display body)
-  (list `procedure para body env))
+  (list `procedure para (scan-out-defines body env) env))
+(define (scan-out-defines body env)
+  (let ((internal-def (filter definition? body)))
+    (let ((list-of-var-val (map (lambda (x) (list x `*unassigned*)) (map definition-variable internal-def)))
+	  (sets (map (lambda (var body) (list `set! var body)) (map definition-variable internal-def) (map (lambda(x) (eval x env)) (map definition-value internal-def)))))
+      (eval (make-let list-of-var-val (append sets body)) env))))
+	    
 (define (compound-procedure? exp)
   (tagged-list exp `procedure))
 (define (procedure-parameters exp)
@@ -334,7 +358,7 @@
 
 
 
-					;let implementation
+					;cond implementation
 (define (cond-clauses exp)
   (cdr exp))
 (define (cond? exp)
@@ -356,7 +380,19 @@
 		     (expand-clauses rest))
 	    (seq->exp (cond-action first))))))
 (define (cond->if exp)
+  (display (expand-clauses (cond-clauses exp)))
   (expand-clauses (cond-clauses exp)))
 (define (eval-cond exp env)
   (eval (cond->if exp) env))
   
+
+
+
+
+
+
+
+
+
+
+					;imp for internal simultaneous def
