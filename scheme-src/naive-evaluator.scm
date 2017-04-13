@@ -7,6 +7,7 @@
 	((assignment? exp) (eval-assignment exp env))
 	((definition? exp) (eval-definition exp env))
 	((if? exp) (eval-if exp env))
+	((cond? exp) (eval-cond exp env))
 	((lambda? exp)
 	 (display "eval-lambda")
 	 (newline)
@@ -274,6 +275,7 @@
 (define primitive-procedures
   (list (list `car car)
 	(list `+ +)
+	(list `= =)
 	(list `cdr cdr)
 	(list `list list)
 	(list `cons cons)
@@ -325,3 +327,36 @@
 		     (procedure-body object)
 		     `procedure env))
       (display object)))
+
+
+
+				      
+
+
+
+					;let implementation
+(define (cond-clauses exp)
+  (cdr exp))
+(define (cond? exp)
+  (tagged-list exp 'cond))
+(define (cond-predicate clause)
+  (car clause))
+(define (cond-action clause)
+  (cdr clause))
+(define (cond-else-clause? clause)
+  (eq? (cond-predicate clause) 'else))
+(define (expand-clauses clauses)
+  (if (null? clauses)
+      `false
+      (let ((first (car clauses))
+	    (rest (cdr clauses)))
+	(if (not (cond-else-clause? first))
+	    (make-if (cond-predicate first)
+		     (seq->exp (cond-action first))
+		     (expand-clauses rest))
+	    (seq->exp (cond-action first))))))
+(define (cond->if exp)
+  (expand-clauses (cond-clauses exp)))
+(define (eval-cond exp env)
+  (eval (cond->if exp) env))
+  
