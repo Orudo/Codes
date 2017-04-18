@@ -67,7 +67,7 @@
     ;(display (let-lambda list-of-var-val body))
     (apply-myevaluator (eval (make-lambda (map car list-of-var-val) body) env) (map cadr list-of-var-val))))
 (define (make-let var-val body)
-  (list 'let var-val body))
+  (cons 'let (cons var-val body)))
 
 
 
@@ -79,7 +79,7 @@
   (caddr exp))
 (define (eval-assignment exp env)
   (set-variable-value! (assignment-variable exp)
-		      (assignment-value exp)
+		      (eval (assignment-value exp) env)
 		      env)
   `ok)
 					;Sentence for definition
@@ -210,20 +210,28 @@
 (define (false? x)
   (eq? x #f))
 
+(define (definition-variable exp)
+  (if (symbol? (cadr exp))
+      (cadr exp)
+      (caadr exp)))
+(define (definition-value exp)
+  (if (symbol? (cadr exp))
+      (caddr exp)
+      (make-lambda (cdadr exp) (cddr exp))))
+      
+
 
 (define (make-procedure para body env)
-  (list `procedure para (scan-out-defines body env) env))
-(define (scan-out-defines body env)
-  (let ((internal-def (filter (lambda (x) (eq? (car x) `define)) body)))
-    ;(error internal-def)
-    (let ((list-of-var-val internal-def)
-	  (sets (map (lambda (var body) (list `set! var body)) (map cadr internal-def) (map (lambda(x) (eval x env)) (map definition-value internal-def)))))
-      (display "scan-out-def output")
-      (newline)
-      (error list-of-var-val)
-      (newline)
-      (error  sets))))
-      ;(eval (make-let list-of-var-val (append sets body)) env))))
+  (display (list `res para (scan-out-defines body)))
+  (list `procedure para (scan-out-defines body) env))
+(define (scan-out-defines body)
+  (let ((internal-def (filter (lambda (x) (eq? (car x) `define)) body))
+	(no-def-body (filter (lambda (x) (not (eq? (car x) `define))) body)))
+    (if (null? internal-def)
+	body
+	(let ((list-of-var-val (map (lambda (x) (list x `*unassigned*)) (map definition-variable internal-def)))
+	      (sets (map (lambda (var body) (list `set! var body)) (map definition-variable internal-def)  (map definition-value internal-def))))
+	  (list (make-let list-of-var-val (append sets no-def-body)))))))
 	    
 (define (compound-procedure? exp)
   (tagged-list exp `procedure))
