@@ -402,57 +402,11 @@
 
 
 
-					;imp for separated symantic analysis and execute
 
-(define (analyze exp)
-  (cond ((self-evaluating? exp)
-	 (analyze-self-evaluating exp))
-	((quoted? exp)
-	 (analyze-quoted exp))
-	((variable? exp)
-	 (analyze-variable exp))
-	((assignment? exp)
-	 (analyze-assignment exp))
-	((definition? exp)
-	 (analyze-definition exp))
-	((if? exp)
-	 (analyze-if exp))
-	((lambda? exp)
-	 (analyze-lambda exp))
-	((begin? exp) (analyze-sequence (begin-action exp)))
-	((bcond? exp)
-	 (analyze (cond->if exp)))
-	((application? exp)
-	 (analyze-application exp))
-	(else (error "Unknown exp type --ANALYZE " exp))))
-(define (analyze-self-evaluating exp)
-  (lambda (env) exp))
-(define (analyze-quoted exp)
-  (lambda (env) (text-of-quotation exp)))
-(define (analyze-variable exp)
-  (lambda (env) (lookup-variable-value exp env)))
-(define (analyze-assignment exp)
-  (let ((var (assignment-variable exp))
-	(value (analyze (assignment-value exp))))
-    (lambda (env)
-      (set-variable-value! var (value env) env)
-      `ok)))
-(define (analyze-definition exp)
-  (let ((var (definition-variable exp))
-	(val (analyze (definition-value exp))))
-    (lambda (env)
-      (define-variable! var (val env) env)
-      `ok)))
-(define (analyze-if exp)
-  (let ((pproc (analyze (if-predicate exp)))
-	(cproc (analyze (if-consequent exp)))
-	(aproc (analyze (if-alternative exp))))
-    (lambda (env)
-      (if (true? (pproc env))
-	  (cproc env)
-	  (aproc env)))))
-(define (analyze-lambda exp)
-  (let ((vars (lambda-variable exp))
-	(pros (analyze-sequence (lambda-body exp))))
-    (lambda (env)
-      (make-procedure vars (pros env) env))))
+
+
+
+
+
+
+					;imp for internal simultaneous def
