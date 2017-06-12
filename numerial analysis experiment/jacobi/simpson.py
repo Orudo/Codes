@@ -10,7 +10,7 @@ def simpsons(fx,a,b):
         res+=2*fx[i]
     return res*h/6
 
-def simpsons(f,a,b,n):
+def simpsons(f,a,b,n):    
     if(n%2):
         raise ValueError("value received must be even n=%d",n)
     h=(b-a)/n
@@ -21,3 +21,5 @@ def simpsons(f,a,b,n):
         res+=2*f(a+i*h)
 
     return res*h/3
+
+

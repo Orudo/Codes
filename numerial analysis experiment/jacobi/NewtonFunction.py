@@ -20,7 +20,7 @@ def NewtonFunction(xi,fi):
         return res
     return iter
 
-sr_x = [i for i in range(-50, 51, 10)]
+'''sr_x = [i for i in range(-50, 51, 10)]
 sr_fx = [i**2+2*i+1 for i in sr_x]
 Nx=NewtonFunction(sr_x,sr_fx)
 
@@ -29,4 +29,4 @@ x=[i for i in np.linspace(-50.0,51.0,1000)]
 fx=[Nx(i) for i in x]
 for i in range(1000):
     print(str(x[i])+" "+str(fx[i]))
-print(Nx(-1))
+print(Nx(-1))'''
