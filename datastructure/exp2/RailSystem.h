@@ -6,7 +6,9 @@
 #include <map>
 #include <list>
 #include <queue>
-#include <vector>
+#include <vector> 
+#include <climits>
+#include <set>
 
 #include "Service.h"
 #include "City.h"
@@ -36,6 +38,8 @@ private:
     void reset(void);
     string recover_route(const string& city);
     pair<int, int> calc_route(string from, string to);
+    //bool queue_has(priority_queue<City*, vector<City*>, Cheapest> queue,City* city);
+    void Cityinit();
 
 public:
 

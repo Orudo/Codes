@@ -1,6 +1,6 @@
 #pragma warning (disable:4786)
 #pragma warning (disable:4503)
-
+#include <set>
 #include "RailSystem.h"
 
 void RailSystem::reset(void) {
@@ -31,6 +31,9 @@ void RailSystem::load_services(string const &filename) {
 			if(cities.find(from)!=cities.end())
 			{
 				outgoing_services.find(from)->second.push_front(new Service(to,fee,distance));
+				//clog<<"input: outgoing "<<outgoing_services.find(from)->second
+				for(list<Service*>::iterator it=outgoing_services.find(from)->second.begin();it!=outgoing_services.find(from)->second.end();it++)
+					clog<<"input:iter:"<<from<<":"<<(*it)->destination<<" fee:"<<(*it)->fee<<endl;
 			}else{
 				cities.insert(std::pair<string,City*>(from,new City(from)));
 				list<Service*> serv;
@@ -75,28 +78,46 @@ bool RailSystem::is_valid_city(const string& name) {
 
 	return cities.count(name) == 1;
 }
-
+void RailSystem::Cityinit(){
+	for (map<string,City*>::iterator it=cities.begin();it!=cities.end();it++)
+	{
+		it->second->total_distance=0;
+		it->second->total_fee=32767;
+		it->second->visited=0;
+	}
+}
 pair<int, int> RailSystem::calc_route(string from, string to) {
-
+	Cityinit();
 	priority_queue<City*, vector<City*>, Cheapest> candidates;
+	set<City*> cityset;
 	int num_cities=cities.size();
 	//candidates.push(from);
 	candidates.push(cities.find(from)->second);
 	cities.find(from)->second->visited++;
+			cities.find(from)->second->total_fee=0;
+	cityset.insert(cities.find(from)->second);
 	while(!candidates.empty())
 	{
-		City* city=candidates.front();
-		city->total_fee=0;
+		City* city=candidates.top();
+		cityset.erase(city);
 		candidates.pop();
-		list<Service*> out_serv=outgoing_services.find(from)->second;
-		for(std::list<Service*>::iterator it=out_serv.begin;it!=out_serv.end();++it)
+		clog<<city->name<<" total fee: "<<city->total_fee<<endl;
+		list<Service*> out_serv=outgoing_services.find(city->name)->second;
+		for(std::list<Service*>::iterator it=out_serv.begin();it!=out_serv.end();++it)
 		{
-			City* des=cities.find(it->destination)->second;
+			City* des=cities.find((*it)->destination)->second;
+			clog<<"des:"<<des->name<<" des total:"<<des->total_fee<<endl;
 			if(des->visited>num_cities)  return pair<int,int>(0,0);
-			if(city->total_fee+it->fee<des->total_fee)
+			if(city->total_fee+(*it)->fee<des->total_fee)
 			{
-				des->total_fee=city->total_fee+it->fee;
-				candidates.push(des);
+				clog<<"des update:"<<des->name<<" fee:"<<city->total_fee+(*it)->fee<<endl;
+				des->total_fee=city->total_fee+(*it)->fee;
+				des->total_distance=city->total_distance+(*it)->distance;
+				clog<<"des update:"<<des->total_fee<<endl;
+				des->from_city=city->name;
+				if(cityset.find(des)==cityset.end())
+					candidates.push(des);
+				else clog<<"block"<<endl;
 				des->visited++;
 			}
 		}
@@ -117,13 +138,16 @@ pair<int, int> RailSystem::calc_route(string from, string to) {
 }
 
 string RailSystem::recover_route(const string& city) {
-	
+	City* current=cities.find(city)->second;
+	string path=current->name;
+	do
+	{
+		path=current->from_city+"->"+path;
+		current=cities.find(current->from_city)->second;
+	}while(current->from_city!="");
+
 	// TODO: walk backwards through the cities
 	// container to recover the route we found
 
-	return "";
-}
-int main(){
-	RailSystem rs("services.txt");
-	return 0;
+	return path;
 }

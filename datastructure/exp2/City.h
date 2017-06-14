@@ -1,6 +1,6 @@
 #ifndef _CITY_H_
 #define _CITY_H_
-
+#include<string>
 using namespace std;
 
 class City {

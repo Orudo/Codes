@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
 
         }
 
-        return EXIT_SUCCESS;
+        return 1;
 
     }
     catch (exception& e) {
@@ -48,5 +48,5 @@ int main(int argc, char* argv[]) {
         cerr << "Unknown exception caught\n";
     }
 
-    return EXIT_FAILURE;
+    return -1;
 }
