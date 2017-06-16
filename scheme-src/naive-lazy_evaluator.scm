@@ -194,7 +194,7 @@
 (define (primitive-procedure? exp)
   (tagged-list exp `primitive))
 
-;(define (apply-myevaluator proc args)
+;efine (apply-myevaluator proc args)
 ;  (cond ((primitive-procedure? proc)
 ;	 (apply-primitive-procedure proc args))
 ;	((compound-procedure? proc)
@@ -341,7 +341,7 @@
 	(list `- -)
 	(list `* *)
 	(list `/ /)
-	(list `or or)
+	;(list `or or)
 	(list `> >)
 	(list `< <)
 	(list `cdr cdr)
@@ -387,7 +387,6 @@
       (announce-output output-prompt)
       (user-print output)))
   (driver-loop))
-
 (define (user-print object)
   (if (compound-procedure? object)
       (display (list `compound-procedure
@@ -559,3 +558,11 @@
 
 (define (force-it obj)
   (if (thunk? obj)
+      (actual-value (thunk-exp obj) (thunk-env obj))
+      obj))
+(define (delay-it exp env)
+  (list `thunk exp env))
+(define (thunk-exp thunk)
+  (cadr thunk))
+(define (thunk-env thunk)
+  (caddr thunk))

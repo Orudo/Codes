@@ -19,9 +19,9 @@ void fifo::simulate(std::string file)
 			//clog<<"poping"<<endl;
 			event eve=workload.front();
 			processing.push(eve);
-			cout<<"arriving at"<<cnt<<" pages "<< eve.getjob().getnumpages()<<endl;
+			cout<<"arriving : "<< eve.getjob().getnumpages()<<" pages from "<<eve.getjob().getuser()<<" at "<<cnt<<endl;
 			if(eta.empty())
-			{eta.push(cnt+eve.getjob().getnumpages()*seconds_per_page);cout<<"serving at"<<cnt<<endl;}
+			{eta.push(cnt+eve.getjob().getnumpages()*seconds_per_page);cout<<" serving : "<< eve.getjob().getnumpages()<<" pages from "<<eve.getjob().getuser()<<" at "<<cnt<<endl;}
 			else eta.push(eta.back()+eve.getjob().getnumpages()*seconds_per_page);
 			workload.pop();
 			
@@ -32,9 +32,10 @@ void fifo::simulate(std::string file)
 			processing.pop();
 			eta.pop();
 			if(!processing.empty()){
-				cout<<"serving at "<<cnt<<endl;
+				event eve=processing.front();
+				cout<<"serving : "<< eve.getjob().getnumpages()<<" pages from "<<eve.getjob().getuser()<<" at "<<cnt<<endl;
 				
-				clog<<processing.front().arrival_time()<<" "<<cnt-processing.front().arrival_time()<<endl;
+				//clog<<processing.front().arrival_time()<<" "<<cnt-processing.front().arrival_time()<<endl;
 				latency+=cnt-processing.front().arrival_time();
 			}
 			//processing.pop();
@@ -45,7 +46,7 @@ void fifo::simulate(std::string file)
 			
 
 	}
-	clog<<latency<<endl<<(float)latency/jobs<<endl<<jobs<<endl;
+	clog<<"All latency:"<<latency<<endl<<"average latency:"<<(float)latency/jobs<<endl<<"job counts:"<<jobs<<endl;
 	
 }
 

@@ -38,7 +38,7 @@
   (if (pair? exp)
       (eq? (car exp) tag)
       #f))
-(define (assignment? exp)
+signment? exp)
   (tagged-list exp `set!))
 (define (definition? exp)
   (tagged-list exp `define))
